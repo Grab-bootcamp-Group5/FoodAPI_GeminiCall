@@ -29,9 +29,6 @@ def respect_rate_limit():
 
 
 def analyze_food(dish_name: str, retries: int = 3) -> dict:
-    """
-    Calls the Gemini API to extract ingredients for the given dish name.
-    """
     prompt = f"""
     List the most important ingredients to cook \"{dish_name}\".
     Return a JSON array named \"ingredients\", where each element has:
@@ -75,10 +72,8 @@ def analyze_food(dish_name: str, retries: int = 3) -> dict:
 def main():
     dish = "hamburger"
     result = analyze_food(dish)
-    # Print to console
     print(json.dumps(result, indent=2, ensure_ascii=False))
 
-    # Save to file
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     safe_name = dish.replace(' ', '_')
     out_path = os.path.join(OUTPUT_FOLDER, f"{safe_name}.json")
