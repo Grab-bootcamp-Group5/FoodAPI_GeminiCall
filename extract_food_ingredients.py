@@ -5,22 +5,22 @@ from datetime import datetime
 import json
 from google import genai
 
+
 # Configuration
 GOOGLE_API_KEY = "API Google Gemini"
 client = genai.Client(api_key=GOOGLE_API_KEY)
 OUTPUT_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "results")
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 
+
 # Setup logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler(os.path.join(OUTPUT_FOLDER, 'extract_food_ingredients.log')),
-        logging.StreamHandler()
-    ]
+    handlers=[logging.FileHandler(os.path.join(OUTPUT_FOLDER, 'extract_food_ingredients.log')), logging.StreamHandler()]
 )
 logger = logging.getLogger(__name__)
+
 
 # Rate limiting: 25 requests/minute
 def respect_rate_limit():
@@ -31,6 +31,7 @@ def respect_rate_limit():
 def analyze_food(dish_name: str, retries: int = 3) -> dict:
     prompt = f"""
     List the most important ingredients to cook \"{dish_name}\".
+    Only recommend ingredients that are must haves for this dish, not includes optional ones or spices, or decorations 
     Return a JSON array named \"ingredients\", where each element has:
     - ingredient_name (string)
     - total unit (return how much \"g\" for solids or \"ml\" for liquids)
@@ -40,7 +41,9 @@ def analyze_food(dish_name: str, retries: int = 3) -> dict:
     "Seafood & Fish Balls", "Instant Foods", "Ice Cream & Cheese", "Cakes",
     "Dried Fruits", "Candies", "Fruit Jam", "Snacks", "Milk", "Yogurt",
     "Alcoholic Beverages", "Beverages", "Seasonings", "Grains & Staples",
-    "Cold Cuts: Sausages & Ham", "Cereals & Grains"]"""
+    "Cold Cuts: Sausages & Ham", "Cereals & Grains"]
+    Only return the JSON format, without any other text.
+    """
 
     default = {"dish": dish_name, "ingredients": []}
 
@@ -74,7 +77,6 @@ def main():
     result = analyze_food(dish)
     print(json.dumps(result, indent=2, ensure_ascii=False))
 
-    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     safe_name = dish.replace(' ', '_')
     out_path = os.path.join(OUTPUT_FOLDER, f"{safe_name}.json")
     with open(out_path, 'w', encoding='utf-8') as f:
